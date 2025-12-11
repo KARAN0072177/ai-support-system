@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Login = () => {
@@ -68,6 +68,24 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // Run once on app start — extract google token from URL fragment if present
+  useEffect(() => {
+    const hash = window.location.hash; // like "#google_token=..."
+    if (hash && hash.includes("google_token=")) {
+      const params = new URLSearchParams(hash.replace("#", ""));
+      const token = params.get("google_token");
+      if (token) {
+        // store token the same way manual login does
+        localStorage.setItem("token", token);
+        // Optionally fetch user info from backend or store minimal info in localStorage
+        // Clear the hash and redirect to home
+        window.location.hash = "";
+        window.location.href = "/";
+      }
+    }
+  }, []);
+
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
@@ -149,6 +167,14 @@ const Login = () => {
             Sign up
           </Link>
         </p>
+
+        <button
+          onClick={() => { window.location.href = "http://localhost:5000/api/auth/google/login"; }}
+          className="w-full rounded-md border px-4 py-2 text-sm"
+        >
+          Continue with Google
+        </button>
+
       </div>
     </div>
   );

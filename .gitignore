@@ -12,3 +12,11 @@ server/.env
 
 # Build
 client/dist/
+
+server/uploads/
+uploads/
+
+
+# editor
+.vscode/
+.DS_Store

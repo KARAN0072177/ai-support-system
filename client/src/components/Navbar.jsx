@@ -20,6 +20,7 @@ const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [user, setUser] = useState(null);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -48,25 +49,31 @@ const Navbar = () => {
     ];
 
     // Check login status whenever route changes (e.g. after login/logout)
+    // Detect login state on every route change OR storage update
     useEffect(() => {
         const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
+        const storedUser = localStorage.getItem("user");
+
+        if (token && storedUser) {
+            setIsLoggedIn(true);
+            setUser(JSON.parse(storedUser));
+        } else {
+            setIsLoggedIn(false);
+            setUser(null);
+        }
     }, [location.pathname]);
 
-    const handleLogoutClick = () => {
-        setShowLogoutModal(true);
-    };
-
-    const handleCancelLogout = () => {
-        setShowLogoutModal(false);
-    };
+    // Handle logout modal
+    const handleLogoutClick = () => setShowLogoutModal(true);
+    const handleCancelLogout = () => setShowLogoutModal(false);
 
     const handleConfirmLogout = () => {
-        // expire "session" on frontend
+        // Clear session
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
         setIsLoggedIn(false);
+        setUser(null);
         setShowLogoutModal(false);
 
         navigate("/login");
@@ -76,8 +83,8 @@ const Navbar = () => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const handleNavClick = () => {
@@ -156,31 +163,29 @@ const Navbar = () => {
                             {/* Login Button */}
 
                             {/* Login / Logout toggle button */}
-                            {!isLoggedIn ? (
-                                // SHOW LOGIN when user is not logged in (guest)
-                                <motion.div whileHover={{ scale: 1.05 }}>
-                                    <Link
-                                        to="/login"
-                                        className="group flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/50 transition-colors"
-                                    >
-                                        <LogIn className="h-4 w-4" />
-                                        Login
-                                        <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </Link>
-                                </motion.div>
+                            {isLoggedIn ? (
+                                // SHOW LOGOUT
+                                <button
+                                    onClick={handleLogoutClick}
+                                    className="group flex items-center gap-2 rounded-lg border border-red-600 px-4 py-2 text-sm font-medium text-red-400 hover:border-red-400 hover:bg-red-900/40 transition"
+                                >
+                                    Logout
+                                </button>
                             ) : (
-                                // SHOW LOGOUT when user is logged in
-                                <motion.div whileHover={{ scale: 1.05 }}>
-                                    <button
-                                        type="button"
-                                        onClick={handleLogoutClick}
-                                        className="group flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-red-100 hover:border-red-400 hover:bg-red-900/40 transition-colors"
-                                    >
-                                        <LogOut className="h-4 w-4" />
-                                        Logout
-                                        <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </button>
-                                </motion.div>
+                                // SHOW LOGIN
+                                <Link
+                                    to="/login"
+                                    onClick={handleNavClick}
+                                    className="group flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/50 transition"
+                                >
+                                    Login
+                                </Link>
+                            )}
+
+                            {isLoggedIn && user && (
+                                <span className="text-sm text-slate-300 mr-3">
+                                    Hi, {user.username}
+                                </span>
                             )}
 
                             <motion.div whileHover={{ scale: 1.07 }} transition={{ type: "spring", stiffness: 300 }}>

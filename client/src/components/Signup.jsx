@@ -206,6 +206,15 @@ const Signup = () => {
             Go to organization signup
           </Link>
         </p>
+
+        // Example: a simple button that starts OAuth flow
+        <button
+          onClick={() => { window.location.href = "http://localhost:5000/api/auth/google"; }}
+          className="rounded-md border px-4 py-2"
+        >
+          Continue with Google
+        </button>
+
       </div>
     </div>
   );
